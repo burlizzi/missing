@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<strings>
+<!--Common-->
+ 
+  
+<!--Settings-->  
+  <!--General-->
+  <string id="100">General</string>
+  <string id="101">ip</string>
+  <string id="102">port</string>
+  <string id="103">usr</string>
+  <string id="104">pwd</string>
+  <string id="200">TNT Village</string>
+
+  <!--Notifications-->
+  <string id="500">Failed to connect to FHEM!</string>
+  <string id="501">Connected to FHEM!</string>
+  <string id="502">Settings changed!</string>
+</strings>
+
+
