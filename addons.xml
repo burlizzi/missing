@@ -1,17 +1,30 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addons>
-<addon id="plugin.video.missing" name="XBMC missing" version="1.0.0" provider-name="luca">
-  <requires>
-    <import addon="xbmc.python" version="2.1.0"/>
-        <import addon="script.module.beautifulsoup" version="3.2.1"/>
-  </requires>
-  <extension point="xbmc.python.pluginsource" library="missmain.py">
-         <provides>video</provides>
-  </extension>
-  <extension point="xbmc.addon.metadata">
-    <summary>XBMC missing episodes</summary>
-    <description>Find missing episodes in XBMC shows.</description>
-    <platform>all</platform>
-  </extension>
+  <addon id="plugin.video.missing" name="XBMC missing" version="1.0.0" provider-name="luca-addons">
+    <requires>
+      <import addon="xbmc.python" version="2.1.0"/>
+          <import addon="script.module.beautifulsoup" version="3.2.1"/>
+    </requires>
+    <extension point="xbmc.python.pluginsource" library="missmain.py">
+          <provides>video</provides>
+    </extension>
+    <extension point="xbmc.addon.metadata">
+      <summary>XBMC missing episodes</summary>
+      <description>Find missing episodes in XBMC shows.</description>
+      <platform>all</platform>
+    </extension>
+  </addon>
+  <addon id="repository.luca" name="My own Kodi Addons" version="1.0.0" provider-name="luca-addons">
+        <extension point="xbmc.addon.repository" name="My own Kodi Addons">
+                <info compressed="false">https://raw.githubusercontent.com/burlizzi/missing/master/addons.xml</info>
+                <checksum>https://raw.githubusercontent.com/burlizzi/missing/master/addons.xml.md5</checksum>                
+                <datadir zip="true">https://raw.githubusercontent.com/burlizzi/missing/master</datadir>
+        </extension>
+        <extension point="xbmc.addon.metadata">
+                <summary>Kodi addon repository for my private use</summary>
+                <description>This repository contains addons that are for me only. You may only view the contents of this repository if you are in my home or you are a real friend of mine.</description>
+                <disclaimer>The owners and submitters to this repository do not host or distribute any of the content displayed by these addons nor do they have any affiliation with the content providers.</disclaimer>
+                <platform>all</platform>
+        </extension>
 </addon>
 </addons>
