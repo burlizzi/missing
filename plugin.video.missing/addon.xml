@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.video.missing" name="XBMC missing" version="1.0.0" provider-name="luca">
+<addon id="plugin.video.missing" name="XBMC missing" version="1.0.1" provider-name="luca">
   <requires>
    <import addon="script.module.future" version="0.0.1"/>
     <!--import addon="xbmc.python" version="3.0.0"/i-->
