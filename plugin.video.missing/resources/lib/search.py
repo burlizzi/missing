@@ -1,14 +1,12 @@
 import xbmc
 import re
 import socket
-try:
-    from urllib.request import urlopen
-except ImportError:
-    from urllib2 import urlopen
+import urllib2
 import zlib
 from zlib import decompress
-from bs4 import BeautifulSoup, BeautifulStoneSoup
-from io import StringIO
+from urllib2 import urlopen, URLError
+from BeautifulSoup import BeautifulSoup, BeautifulStoneSoup
+from StringIO import StringIO
 import gzip
 import xbmcgui
 
@@ -30,15 +28,17 @@ class x1337x(Search):
         url = self.search_uri % '+'.join(terms.split(' '))
         xbmc.log( "url: %s" % ( url ), xbmc.LOGSEVERE )
         f = urlopen(url)
-        soup = BeautifulSoup(f.read())
+        soup = BeautifulStoneSoup(f.read())
         for table in soup.findAll('table',{'class': 'table-list table table-responsive table-striped'}):
          for row in table.find('tbody').findAll('tr'):
             xbmc.log( "row: %s" % ( row ), xbmc.LOGSEVERE )
-            details=row.find('td', class_='coll-1 name');
-            size=row.find('td',class_=re.compile('coll-4 .*'));
-            name = details.text
+            details=row.find('td',{"class":"coll-1 name"});
+            size=row.find('td',{"class":re.compile("coll-4.*")});
+            xbmc.log( "size: %s" % ( size ), xbmc.LOGSEVERE )
+            if not size is None:
+               name = details.text
             test = 'http://1337x.to' + details.find( 'a', {"class": None})['href']
-          
+
             magnet = ""
             seeds = 0
             leechers = 0
@@ -50,36 +50,71 @@ class x1337x(Search):
                 'leechers': leechers,
                 'magnet' : magnet,
             })
-        return torrents        
+        return torrents
+        #for details in soup.findAll('td', {'class': 'coll-1 name'}):
+        #    name = details.text
+        #    test = 'http://1337x.to' + details.find( 'a', {"class": None})['href']
+        #    print test
+        #  
+        #    magnet = ""
+        #    seeds = 0
+        #    leechers = 0
+        #    torrents.append({
+        #        'url': test,
+        #        'name': name,
+        #        'seeds': seeds,
+        #        'leechers': leechers,
+        #        'magnet' : magnet,
+        #    })
+        #return torrents        
         
     def popular(self, terms):
         torrents = []
         url = "http://1337x.to/popular-" + terms
         xbmc.log( "url: %s" % ( url ), xbmc.LOGSEVERE )
+        
         f = urlopen(url)
-        content=f.read()
-        print(content)
-        soup = BeautifulSoup(content)
+        soup = BeautifulStoneSoup(f.read())
         for table in soup.findAll('table',{'class': 'table-list table table-responsive table-striped'}):
          for row in table.find('tbody').findAll('tr'):
             xbmc.log( "row: %s" % ( row ), xbmc.LOGSEVERE )
-            details=row.find('td', class_='coll-1 name');
-            size=row.find('td',class_=re.compile('coll-4 .*'));
+            details=row.find('td',{"class":"coll-1 name"});
+            size=row.find('td',{"class":re.compile("coll-4.*")});
+#            details=row.find('td[class*="coll-1 name"]');
+#            size=row.find('td[class*="coll-4"]');
+#            details=row.find('td', class_='coll-1 name');
+#            size=row.find('td',class_=re.compile('coll-4 .*'));
             name = details.text
             test = 'http://1337x.to' + details.find( 'a', {"class": None})['href']
-          
+
             magnet = ""
             seeds = 0
             leechers = 0
             torrents.append({
                 'url': test,
-                'name': str(name),
+                'name': name.encode('ascii', 'ignore').decode('ascii'),
                 'size': size.text,
                 'seeds': seeds,
                 'leechers': leechers,
                 'magnet' : magnet,
             })
-        return torrents        
+        return torrents
+
+
+#        for details in soup.findAll('td', {'class': 'coll-1 name'}):
+##            name = details.text
+#            test = 'http://1337x.to' + details.find( 'a', {"class": None})['href']
+#           
+#            seeds = 0
+#            leechers = 0
+#            torrents.append({
+#                'url': test,
+#                'name': name,
+#                'seeds': seeds,
+ #               'leechers': leechers,
+ #               'magnet' : test,
+#            })
+#        return torrents        
         
 class Mininova(Search):
     def __init__(self):
@@ -92,6 +127,7 @@ class Mininova(Search):
         soup = BeautifulStoneSoup(f.read())
         for item in soup.findAll('item'):
             (seeds, leechers) = re.findall('Ratio: (\d+) seeds, (\d+) leechers', item.description.text)[0]
+            print item.title.text
             torrents.append({
                 'url': item.enclosure['url'],
                 'name': item.title.text,
@@ -142,6 +178,7 @@ class Kickass(Search):
            f = gzip.GzipFile(fileobj=buf)
 
         soup = BeautifulStoneSoup(f.read())
+        print soup
         for item in soup.findAll('item'):
             torrents.append({
                 'magnet': item.find('torrent:magneturi').text,

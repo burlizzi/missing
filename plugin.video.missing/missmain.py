@@ -20,12 +20,7 @@ import xbmcaddon
 import xbmcgui
 import time
 import os
-try:
-    import urllib.request 
-except ImportError:
-    import urllib2 
-
-import sys, os, re, time
+import urllib, sys, os, re, time
 import xbmcaddon, xbmcplugin, xbmcgui, xbmc
 
 __addonname__ = "Missing"
@@ -72,20 +67,20 @@ params = get_params()
 season = None
 
 try:
-    url = urllib.parse.unquote_plus(params['url'])
+    url = urllib.unquote_plus(params['url'])
 except:
     pass
 try:
-    path = urllib.parse.unquote_plus(params['path'])
+    path = urllib.unquote_plus(params['path'])
 except:
     pass
 try:
-    name = urllib.parse.unquote_plus(params['name'])
+    name = urllib.unquote_plus(params['name'])
 except:
     pass
 
 try:
-    season = urllib.parse.unquote_plus(params['season'])
+    season = urllib.unquote_plus(params['season'])
 except:
     pass
 	

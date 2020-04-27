@@ -22,33 +22,26 @@ import xbmcgui
 import xbmcplugin
 import xbmcaddon
 import sys
-try:
-    import urllib.request
-except ImportError:
-    import urllib2
+import urllib
+import urllib2
 import os
 import re
 import telnetlib
 import xml.dom.minidom
 import json
-try:
- import http.client
-except:
- import httplib
-
+import httplib
 import datetime
 import re
-#import conn
-#import emule
+import emule
 import getpass
 import time
 import glob
 import search
-from urllib.request import urlopen
+from urllib2 import urlopen
 
 
 
-from html.parser import HTMLParser
+from HTMLParser import HTMLParser
 import os.path, time
 
 
@@ -56,8 +49,8 @@ import os.path, time
 
 
 from utilities import *
-from bs4 import BeautifulSoup, BeautifulStoneSoup
-from urllib.request import urlopen
+from BeautifulSoup import BeautifulSoup, BeautifulStoneSoup
+from urllib2 import urlopen
 
 if sys.version_info < (2, 7):
     import simplejson
@@ -105,31 +98,31 @@ class TransmissionRPC(object):
         self.session_id = 0
         self.session = {}
         if username and password:
-            password_manager = urllib.HTTPPasswordMgrWithDefaultRealm()
+            password_manager = urllib2.HTTPPasswordMgrWithDefaultRealm()
             password_manager.add_password(realm = None, uri = self.url, user = username, passwd = password)
-            opener = urllib.build_opener(urllib.HTTPBasicAuthHandler(password_manager), urllib.HTTPDigestAuthHandler(password_manager))
+            opener = urllib2.build_opener(urllib2.HTTPBasicAuthHandler(password_manager), urllib2.HTTPDigestAuthHandler(password_manager))
             opener.addheaders = [('User-agent', 'couchpotato-transmission-client/1.0')]
-            urllib.install_opener(opener)
+            urllib2.install_opener(opener)
         self.session = self.get_session()
 
     def _request(self, ojson):
         self.tag += 1
         headers = {'x-transmission-session-id': str(self.session_id)}
-        request = urllib.request.Request(self.url, json.dumps(ojson).encode('utf-8'), headers)
+        request = urllib2.Request(self.url, json.dumps(ojson).encode('utf-8'), headers)
         try:
-            open_request = urllib.request.urlopen(request)
+            open_request = urllib2.urlopen(request)
             response = json.loads(open_request.read())
             #print ('response: %s', json.dumps(response))
             if response['result'] == 'success':
                 #print ('Transmission action successfull')
                 return response['arguments']
             else:
-                print(('Unknown failure sending command to Transmission. Return text is: %s', response['result']))
+                print  ('Unknown failure sending command to Transmission. Return text is: %s', response['result'])
                 return False
-        except (http.client.InvalidURL):
-            print(('Invalid Transmission host, check your config %s', err))
+        except httplib.InvalidURL as err:
+            print ('Invalid Transmission host, check your config %s', err)
             return False
-        except urllib.request.HTTPError as err:
+        except urllib2.HTTPError as err:
             if err.code == 401:
                 print ('Invalid Transmission Username or Password, check your config')
                 return False
@@ -138,17 +131,17 @@ class TransmissionRPC(object):
                 try:
                     self.session_id = \
                         re.search('X-Transmission-Session-Id:\s*(\w+)', msg).group(1)
-                    print(('X-Transmission-Session-Id: %s', self.session_id))
+                    print ('X-Transmission-Session-Id: %s', self.session_id)
 
                     # #resend request with the updated header
 
                     return self._request(ojson)
                 except:
-                    print(('Unable to get Transmission Session-Id %s', err))
+                    print ('Unable to get Transmission Session-Id %s', err)
             else:
-                print(('TransmissionRPC HTTPError: %s', err))
-        except (urllib.URLError, err):
-            print(('Unable to connect to Transmission %s', err))
+                print ('TransmissionRPC HTTPError: %s', err)
+        except (urllib2.URLError, err):
+            print ('Unable to connect to Transmission %s', err)
 
     def get_session(self):
         post_data = {'method': 'session-get', 'tag': self.tag}
@@ -175,25 +168,25 @@ class Client(object):
     def __init__(self, address=UT_ADDRESS, port = UT_PORT, user = UT_USER, password = UT_PASSWORD ):
         base_url = 'http://' + address + ':' + port 
         self.url = base_url + '/gui/'
-        self.MyCookies = http.cookiejar.LWPCookieJar()
+        self.MyCookies = cookielib.LWPCookieJar()
         
         if True:
-            password_manager = urllib.request.HTTPPasswordMgrWithDefaultRealm()
+            password_manager = urllib2.HTTPPasswordMgrWithDefaultRealm()
             password_manager.add_password(realm=None, uri=self.url, user=user, passwd=password)
             if os.path.isfile(COOKIEFILE) : self.MyCookies.load(COOKIEFILE)
-            opener = urllib.request.build_opener(
-                urllib.request.HTTPCookieProcessor(self.MyCookies)
-                , urllib.request.HTTPBasicAuthHandler(password_manager)
+            opener = urllib2.build_opener(
+                urllib2.HTTPCookieProcessor(self.MyCookies)
+                , urllib2.HTTPBasicAuthHandler(password_manager)
                 )
             opener.addheaders = [('User-Agent', 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1) chromeframe/4.0')]
-            urllib.request.install_opener(opener)
+            urllib2.install_opener(opener)
 
     def HttpCmd(self, urldta, postdta=None, content=None):
         
-        #xbmc.log( "%s::HttpCmd - url: %s" % ( __addonname__, urldta ), xbmc.LOGDEBUG )
+		#xbmc.log( "%s::HttpCmd - url: %s" % ( __addonname__, urldta ), xbmc.LOGDEBUG )
         ## Standard code
 
-        req = urllib.Request(urldta,postdta)
+        req = urllib2.Request(urldta,postdta)
 
         ## Process only if Upload..
         if content != None   :
@@ -202,7 +195,7 @@ class Client(object):
         if postdta != None   :
                 req.add_header('Content-Length',str(len(postdta)))
 
-        response = urllib.request.urlopen(req,timeout=100)
+        response = urllib2.urlopen(req,timeout=100)
         link=response.read().strip()
         #print "lungo:" + str(sys.getsizeof(link)) 
 
@@ -214,9 +207,9 @@ class Client(object):
         return link
 
 
-        
-        
-        
+		
+		
+		
 params = {
     'address': UT_ADDRESS,
     'port': UT_PORT,
@@ -231,21 +224,21 @@ tntClient = Client()
 
 def getToken():
     tokenUrl = "http://"+UT_ADDRESS+":"+UT_PORT+"/gui/token.html"
-    print (tokenUrl)
+    print tokenUrl
 
     data = myClient.HttpCmd(tokenUrl)
     match = re.compile("<div id='token' style='display:none;'>(.+?)</div>").findall(data)
     token = match[0]
 
-    return token    
+    return token	
 
 def adduTorrent(torrenturl,path):
-  print (torrenturl)
-  token = getToken()            
+  print torrenturl
+  token = getToken()			
   url = 'http://'+UT_ADDRESS+':'+UT_PORT+'/gui/?token=' + token + '&action=list-dirs&t=1370371190822'
   data = myClient.HttpCmd(url)
   
-  data = str(data, 'utf-8', errors='ignore')
+  data = unicode(data, 'utf-8', errors='ignore')
   json_response = simplejson.loads(data)
   path = de_unc(path)
   #xbmc.executebuiltin('Notification("'+ path +'","' +path+'")')
@@ -255,43 +248,43 @@ def adduTorrent(torrenturl,path):
   for dir in json_response['download-dirs']:
     npath = dir['path'].upper()
     if path.find(npath)>=0:
-        trovato = i
-        subpath = path[path.index(dir['path'].upper())+len(dir['path']):]
-        break
+	   trovato = i
+	   subpath = path[path.index(dir['path'].upper())+len(dir['path']):]
+	   break
     i = i + 1
 
   
 
   #xbmc.executebuiltin('Notification("'+ urllib.quote(torrenturl,'') +'","")') 
-  url = 'http://'+UT_ADDRESS+':'+UT_PORT+'/gui/?token=' + token + '&action=add-url&s=' + urllib.parse.quote(torrenturl,'') + '&download_dir={0}&path='.format(i) + urllib.parse.quote(subpath,'') +'&t=1370375169507'
+  url = 'http://'+UT_ADDRESS+':'+UT_PORT+'/gui/?token=' + token + '&action=add-url&s=' + urllib.quote(torrenturl,'') + '&download_dir={0}&path='.format(i) + urllib.quote(subpath,'') +'&t=1370375169507'
   
   data = myClient.HttpCmd(url)
   #xbmc.executebuiltin('Notification("'+ data +'","' +data+'")') 
-    
-    
+	
+	
 def missing_fetch3(name,id,path):
   ret = True
   #print "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
   path = de_unc(path)
   
-  print (id)
+  print id
   if UT_TYPE == "1":
-      trpc = TransmissionRPC()
-      params = {'download-dir': path
-                }
-      
-      remote_torrent = trpc.add_torrent_uri(id, arguments = params)
-      if remote_torrent:
-        remote_torrent ="[COLOR green]success[/COLOR]"
-      else:
-        remote_torrent ="[COLOR red]failure[/COLOR]"
+	  trpc = TransmissionRPC()
+	  params = {'download-dir': path
+				}
+	  
+	  remote_torrent = trpc.add_torrent_uri(id, arguments = params)
+	  if remote_torrent:
+			remote_torrent ="[COLOR green]success[/COLOR]"
+	  else:
+			remote_torrent ="[COLOR red]failure[/COLOR]"
 
-      xbmc.executebuiltin('Notification("'+ remote_torrent + " " + name+ '","' +path+' ", icon = xbmcgui.NOTIFICATION_INFO)')
+	  xbmc.executebuiltin('Notification("'+ remote_torrent + " " + name+ '","' +path+' ", icon = xbmcgui.NOTIFICATION_INFO)')
 
   if UT_TYPE == "0":
-    torrenturl = "http://torcache.net/torrent/"+id+".torrent"
-    adduTorrent(torrenturl,path)
-    xbmc.executebuiltin('Notification("[COLOR green]success[/COLOR] ' + name+ '","' +path+' ", icon = xbmcgui.NOTIFICATION_INFO)')
+	torrenturl = "http://torcache.net/torrent/"+id+".torrent"
+	adduTorrent(torrenturl,path)
+	xbmc.executebuiltin('Notification("[COLOR green]success[/COLOR] ' + name+ '","' +path+' ", icon = xbmcgui.NOTIFICATION_INFO)')
   
   return ret
 
@@ -313,11 +306,11 @@ def missing_fetch5():
       plot =""
       rating = 0
       for item1 in item.parent.parent.findAll(alt="*"):
-        title = title + "*"
-        rating = rating + 1         
+		title = title + "*"
+		rating = rating + 1			
       for item1 in item.parent.parent.findAll(alt="1/2"):
-        title = title + "/"
-        rating = rating + 0.5
+		title = title + "/"
+		rating = rating + 0.5
       title = title + "[/COLOR][COLOR blue]"
       for item1 in item.parent.parent.parent.findNextSiblings('a',href=re.compile('data='),limit=1):
         data = item1['href'][-10:]
@@ -339,8 +332,8 @@ def missing_fetch5():
         plot =  item1.findNext('p').text
       for item1 in item.parent.parent.findNextSiblings('div',{ "class" : "linkblu" },limit=1):
         plot =  item1.findNext('p').text
-#       title = title + '[CR]' + item1.text
-    
+#		title = title + '[CR]' + item1.text
+	
       addDir(title.encode('ascii', 'replace'),title1 ,2,image,True," ","/media/4T/Documenti/Film",data = data, plot = plot, rating = rating)
       
 
@@ -375,30 +368,30 @@ def TNTDownload(name,url,path):
   ret = True
   #xbmc.executebuiltin('Notification("'+ path + '","' +name+'", icon = xbmcgui.NOTIFICATION_INFO)')
   xbmc.executebuiltin('Notification("ricevuto...","' +name+'", icon = xbmcgui.NOTIFICATION_INFO)')
-  print (url)
+  print url
   f = urlopen(url,timeout=100)
   data = f.read()
   soup = BeautifulStoneSoup(data)
   path = de_unc(path)
   
   for item in soup.html.body.findAll('a',{ 'title':'Scarica allegato' }):
-      params = {'download-dir': path
-                }
-      remote_torrent = False
-      
-      if UT_TYPE == "1":
-        trpc = TransmissionRPC()
-        remote_torrent = trpc.add_torrent_uri(item['href'], arguments = params)
-      if UT_TYPE == "0":
-        adduTorrent(item['href'],path)
-        remote_torrent = True
+	  params = {'download-dir': path
+				}
+	  remote_torrent = False
+	  
+	  if UT_TYPE == "1":
+		trpc = TransmissionRPC()
+		remote_torrent = trpc.add_torrent_uri(item['href'], arguments = params)
+	  if UT_TYPE == "0":
+		adduTorrent(item['href'],path)
+		remote_torrent = True
 
-      if remote_torrent:
-       remote_torrent ="[COLOR lime]success [/COLOR]"
-      else:
-        remote_torrent ="[COLOR red]failure [/COLOR]"
-      xbmc.executebuiltin('Notification("'+ remote_torrent + path +' ","' +name+'", icon = xbmcgui.NOTIFICATION_INFO)')
-      break
+	  if remote_torrent:
+	   remote_torrent ="[COLOR lime]success [/COLOR]"
+	  else:
+		remote_torrent ="[COLOR red]failure [/COLOR]"
+	  xbmc.executebuiltin('Notification("'+ remote_torrent + path +' ","' +name+'", icon = xbmcgui.NOTIFICATION_INFO)')
+	  break
   return ret
   
   
@@ -419,7 +412,7 @@ def missing_fetch7(name,id,path):
        title = h.unescape(item.title.text).encode('ascii', 'ignore') + ' ' + desc
        url = item.link.text.encode('ascii', 'replace')
        i=""
-       print (url)
+       print url
        addDir(title ,url ,"TNTDownload",i,False," ",path)
                 
   xbmcplugin.setContent(int(sys.argv[1]), 'movies')
@@ -432,7 +425,6 @@ def missing_fetch7(name,id,path):
   return   
 
 def colorize(data):
-  data=str(data)
   data = data.replace('<b>','[COLOR blue]')
   data = data.replace('</b>','[/COLOR] ')
   
@@ -445,11 +437,9 @@ def colorize(data):
   replace = re.compile(re.escape('720'), re.IGNORECASE)  
   data = replace.sub('[COLOR red]720[/COLOR]',data)
 
-  replace = re.compile(re.escape('264'), re.IGNORECASE)  
-  data = replace.sub('[COLOR brown]264[/COLOR]',data)
+  replace = re.compile(re.escape('x264'), re.IGNORECASE)  
+  data = replace.sub('[COLOR brown]x264[/COLOR]',data)
   
-  replace = re.compile(re.escape('265'), re.IGNORECASE)  
-  data = replace.sub('[COLOR cyan]265[/COLOR]',data)
   
   replace = re.compile(re.escape('AC3'), re.IGNORECASE)  
   data = replace.sub('[COLOR yellow]AC3[/COLOR]',data)
@@ -460,59 +450,50 @@ def colorize(data):
 
   
 def cercaTNT(name,id,path):
-  #print "-----------------------------------------------------------------------------------------------------------------------------------"
-  #print name
-  #print id
-  #print "puntate:"+puntate
-  #addDir("aMule global",id,6,"",True,puntate,path)
-  #addDir("aMule kad",id,6,"",True,puntate,path)
 
-  #addDir("eMule global",id,6,"",True,puntate,path)
-  #addDir("eMule kad",id,6,"",True,puntate,path)
-  
 
   Contentx = 'application/x-www-form-urlencoded'
   terms = id
 
   if True:
-      #print "log in ------------------------------------------------------------"  
-      Postx='referer=http%3A%2F%2Fforum.tntvillage.scambioetico.org%2Findex.php%3Fact%3Dallreleases&UserName='+TNT_USER+'&PassWord='+TNT_PASSWORD+'&CookieDate=1'
-      url = 'http://forum.tntvillage.scambioetico.org/index.php?act=Login&CODE=01'
-      
-      Response = tntClient.HttpCmd(url, postdta=Postx, content=Contentx)
+	  #print "log in ------------------------------------------------------------"	
+	  Postx='referer=http%3A%2F%2Fforum.tntvillage.scambioetico.org%2Findex.php%3Fact%3Dallreleases&UserName='+TNT_USER+'&PassWord='+TNT_PASSWORD+'&CookieDate=1'
+	  url = 'http://forum.tntvillage.scambioetico.org/index.php?act=Login&CODE=01'
+	  
+	  Response = tntClient.HttpCmd(url, postdta=Postx, content=Contentx)
 
-      Postx='sb=0&sd=0&cat=0&stn=20&filter='+terms+'&set=Imposta+filtro'
-      url = 'http://forum.tntvillage.scambioetico.org/index.php?act=allreleases'
-      
-      Response = tntClient.HttpCmd(url, postdta=Postx, content=Contentx)
-      
+	  Postx='sb=0&sd=0&cat=0&stn=20&filter='+terms+'&set=Imposta+filtro'
+	  url = 'http://forum.tntvillage.scambioetico.org/index.php?act=allreleases'
+	  
+	  Response = tntClient.HttpCmd(url, postdta=Postx, content=Contentx)
+	  
   #print Response
   
   
 
   
-      soup = BeautifulStoneSoup(Response,convertEntities=BeautifulSoup.HTML_ENTITIES)
-      found = False
-      for item in soup.html.body.findAll('tr',{ 'class':'row4'}):
+	  soup = BeautifulStoneSoup(Response,convertEntities=BeautifulSoup.HTML_ENTITIES)
+	  found = False
+	  for item in soup.html.body.findAll('tr',{ 'class':'row4'}):
        #print item
      #try:
        
-        title = colorize(item.text.encode('ascii', 'ignore'))
-        url = item.a['href'].encode('ascii', 'replace')
+		title = colorize(item.text.encode('ascii', 'ignore'))
+		url = item.a['href'].encode('ascii', 'replace')
        #f = urlopen(url)
        #soup1 = BeautifulStoneSoup(f.read())
        #for img in soup1.html.body.findAll('img',{ 'alt':'user posted image' }):
-        #   i=img['src'] 
-        #   break
-        i=""
-        addDir(title ,url ,"TNTDownload",i,False," ",path)
-      xbmcplugin.endOfDirectory(int(sys.argv[1]),cacheToDisc=False)
+		#	i=img['src'] 
+		#	break
+		i=""
+		addDir(title ,url ,"TNTDownload",i,False," ",path)
+	  xbmcplugin.endOfDirectory(int(sys.argv[1]),cacheToDisc=False)
      #except:
-        #print "error"
+		#print "error"
 def second_level(name,url,path):
     xbmc.log( "second : %s" % ( url ), xbmc.LOGSEVERE ) 
     f = urlopen(url)
-    anothersoup = BeautifulSoup(f.read())
+    anothersoup = BeautifulStoneSoup(f.read())
     magnet = anothersoup.find( 'a', href=re.compile('magnet.*'))
     #xbmc.log( "anothge : %s" % ( magnet ), xbmc.LOGSEVERE ) 
     xbmc.log( "magnet : %s" % ( magnet['href'] ), xbmc.LOGSEVERE ) 
@@ -531,8 +512,8 @@ def missing_fetch2(name,id,puntate,path):
   #p.create("test", "test")
   terms = ' '.join(id.split(' '))
   if not (puntate is None):
-    terms = terms+' '+' '.join(puntate.split('|'))
-    
+	terms = terms+' '+' '.join(puntate.split('|'))
+	
   xbmc.executebuiltin( id)
   #cercaTNT(name,terms,path)
   #return
@@ -556,27 +537,28 @@ def missing_fetch2(name,id,puntate,path):
       
       for t in results:
         magnet='&'.join(t['magnet'].split('&')[:2])
-        print (magnet)
-        xbmc.log( "second : %s,%s,%s" % ( name,t['size'],path ), xbmc.LOGSEVERE ) 
+        print magnet
+        xbmc.log( "second : %s,%s,%s" % ( name,t['url'],path ), xbmc.LOGSEVERE ) 
         addDir(colorize(t['name'] + '[CR][COLOR green]                                      ' + t['size'] + '[/COLOR]'),t['url'],"second_level",path,True,path,path)
+        #addDir(colorize(t['name'].encode('ascii', 'ignore')),t['url'],"second_level",path,True,path,path)
 
       pages = terms.split('/')
       page = '2'
       if len(pages) > 1:
-        print ("caso 1  ")
+        print "caso 1  "
         page = str(int(pages[len(pages)-1])+1)
         pages[len(pages)-1] = page
       else:
-        print ("caso 2  ")
+        print "caso 2  "
         pages.append('2')
       
       addDir("Page "+page ,'/'.join(pages) ,2,"",True,"",path)
 
-    
+	
   if False:
    addDir("--------------TORRENTZ----------------" ,"" ,0,"",False,"",path)
    if not "file" in id:
-     addDir("cerca nei file","file:"+id,2,"",True,puntate,path)
+	 addDir("cerca nei file","file:"+id,2,"",True,puntate,path)
 
    if (len(puntate)>325):
        addDir("more...",id,2,"",True,'|'.join(puntate.split('|')[50:]),path)
@@ -604,17 +586,17 @@ def missing_fetch2(name,id,puntate,path):
        if i > 3:
          found = True
          try:
-             hash=item.dt.a['href'][1:]
-             print (hash)
-             testo = item.dt.a.text
-             for xxitem in item.findAll('span',{ 'class':'u'}):
-                  testo = testo + " [COLOR green]" + xxitem.text + "[/COLOR]"
-             for xxitem in item.findAll('span',{ 'class':'d'}):
-                  testo = testo + " [COLOR red]" + xxitem.text + "[/COLOR]"
-             addDir(testo,'magnet:?xt=urn:btih:'+hash,3,"",False,path)
+        	 hash=item.dt.a['href'][1:]
+        	 print hash
+        	 testo = item.dt.a.text
+        	 for xxitem in item.findAll('span',{ 'class':'u'}):
+        	      testo = testo + " [COLOR green]" + xxitem.text + "[/COLOR]"
+        	 for xxitem in item.findAll('span',{ 'class':'d'}):
+        	      testo = testo + " [COLOR red]" + xxitem.text + "[/COLOR]"
+        	 addDir(testo,'magnet:?xt=urn:btih:'+hash,3,"",False,path)
          except:
-             print ("error")
-        
+		     print "error"
+		
 
   # addDir("----------------------------------------------------","",0)
   # nid = id + ' ' + season
@@ -706,10 +688,10 @@ def missing_fetch2(name,id,puntate,path):
   return ret
 
 def tvdb(name):
-  req = urllib.request.Request("http://thetvdb.com/api/GetSeries.php?seriesname="+ urllib.parse.quote_plus(name) +"&language=en")
-  try: handle = urllib.request.urlopen(req)
-  except (IOError, e):
-    xbmc.log('missing... url ' + "http://thetvdb.com/api/GetSeries.php?seriesname="+ urllib.parse.quote_plus(name) +"&language=it", level=xbmc.LOGERROR)
+  req = urllib2.Request("http://thetvdb.com/api/GetSeries.php?seriesname="+ urllib.quote_plus(name) +"&language=it")
+  try: handle = urllib2.urlopen(req)
+  except IOError, e:
+    xbmc.log('missing... url ' + "http://thetvdb.com/api/GetSeries.php?seriesname="+ urllib.quote_plus(name) +"&language=it", level=xbmc.LOGERROR)
     queue = handle.read()
   else:
     queue = handle.read()
@@ -717,27 +699,35 @@ def tvdb(name):
 
   xmldata = xml.dom.minidom.parseString(queue)
   serieid=xmldata.getElementsByTagName('seriesid')[0].firstChild.nodeValue
-  for Serie in xmldata.getElementsByTagName('Series'):
-    xbmc.log('iter ' + Serie.getElementsByTagName('SeriesName')[0].firstChild.nodeValue, level=xbmc.LOGERROR)
-    if Serie.getElementsByTagName('SeriesName')[0].firstChild.nodeValue==name:
-        serieid=Serie.getElementsByTagName('seriesid')[0].firstChild.nodeValue
 
-  xbmc.log('serieid ' + serieid, level=xbmc.LOGERROR)
-  req = urllib.request.Request("http://thetvdb.com/api/6E82FED600783400/series/"+serieid+"/all/it.xml")
-  try: handle = urllib.request.urlopen(req)
-  except (IOError, e):
+  req = urllib2.Request("http://thetvdb.com/api/6E82FED600783400/series/"+serieid+"/all/it.xml")
+  try: handle = urllib2.urlopen(req)
+  except IOError, e:
     xbmc.log('SABnzbd-Suite: could not determine SABnzbds status', level=xbmc.LOGERROR)
   else:
-    queue = handle.read().decode('utf-8') #.read()
+    queue = handle.read()
     handle.close()
   return queue
 
 def de_unc(path):
-    searchpath = path
-    #searchpath = (searchpath.replace('/','\\')).upper()
-    searchpath = (searchpath.replace('nfs://odroidxu4',''))
-    searchpath = (searchpath.replace('smb:',''))
-    return searchpath
+	searchpath = path
+	#searchpath = (searchpath.replace('/','\\')).upper()
+	searchpath = (searchpath.replace('nfs://bender',''))
+	searchpath = (searchpath.replace('nfs://BENDER',''))
+	searchpath = (searchpath.replace('nfs://odroidxu4/export','/media'))
+	searchpath = (searchpath.replace('smb:',''))
+	searchpath = (searchpath.replace('//BENDER/c','/media/2T'))
+	searchpath = (searchpath.replace('//BENDER/d','/media/32'))
+	searchpath = (searchpath.replace('//BENDER/f','/media/VOLUME'))
+
+	searchpath = (searchpath.replace('//bender/c','/media/2T'))
+	searchpath = (searchpath.replace('//bender/d','/media/32'))
+	searchpath = (searchpath.replace('//bender/f','/media/VOLUME'))
+	
+	
+	
+	
+	return searchpath
   
 
 def missing_fetch1(name,id,path):
@@ -746,37 +736,43 @@ def missing_fetch1(name,id,path):
   #file = file.replace('/','\\')
   file = file.replace('nfs://odroidxu4/export','/media')
   file = file.replace('smb:','')
+  file = (file.replace('//BENDER/c','/media/2T'))
+  file = (file.replace('//BENDER/d','/media/32'))
+  file = (file.replace('//BENDER/f','/media/VOLUME'))
+
+  file = (file.replace('//bender/c','/media/2T'))
+  file = (file.replace('//bender/d','/media/32'))
+  file = (file.replace('//bender/f','/media/VOLUME'))
   
   if os.path.isfile(file) and (datetime.datetime.now()-datetime.datetime.fromtimestamp(os.path.getmtime(file))).days<10:
    with open(file, 'r') as content_file:
       queue = content_file.read()
   else: 
      queue = tvdb(name)  
-     xbmc.log(queue, level=xbmc.LOGERROR)
      try:
-         xbmc.log(queue, level=xbmc.LOGERROR)
-         with open(file, 'w') as content_file:
-          content_file.write(queue)
-          xbmc.executebuiltin('Notification("'+ name +' reloaded","' +path+' ", icon = xbmcgui.NOTIFICATION_INFO)')
+		 xbmc.log(file+queue, level=xbmc.LOGERROR)
+		 with open(file, 'w') as content_file:
+		  content_file.write(queue)
+		  xbmc.executebuiltin('Notification("'+ name +' reloaded","' +path+' ", icon = xbmcgui.NOTIFICATION_INFO)')
      except:
-          xbmc.executebuiltin('Notification("'+ name +' fail writing cache","' +path+' ", icon = xbmcgui.NOTIFICATION_INFO)')
+		  xbmc.executebuiltin('Notification("'+ name +' fail writing cache","' +path+' ", icon = xbmcgui.NOTIFICATION_INFO)')
      
-     
+	 
   
   file = de_unc(path)+'search.tdb'
   if os.path.isfile(file):
-         with open(file, 'r') as content_file:
-          name = content_file.read()
+		 with open(file, 'r') as content_file:
+		  name = content_file.read()
   else: 
-         name = name
+		 name = name +''
   
-    
-  print (queue)
-  xmldata = xml.dom.minidom.parseString(str(queue))
+	
+    #print queue
+  xmldata = xml.dom.minidom.parseString(queue)
   allepisodes=xmldata.getElementsByTagName('Episode')
   json_query_season = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodes", "params": {"properties": ["season", "episode"], "sort": { "method": "label" }, "tvshowid":'+id+'}, "id": 1}')
   xbmc.log('{"jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodes", "params": {"properties": ["season", "episode"], "sort": { "method": "label" }, "tvshowid":'+id+'}, "id": 1}', level=xbmc.LOGERROR)
-  print (json_query_season)
+  print json_query_season
   xbmc.log(json_query_season, level=xbmc.LOGERROR)
   jsonobject_season = simplejson.loads(json_query_season)
   #Get start/end and total seasons
@@ -788,7 +784,7 @@ def missing_fetch1(name,id,path):
   tutti = "" 
   separator = ""
   addDir("Any",name,2,"",True," ",path)
-  if 'episodes' in jsonobject_season['result']:
+  if jsonobject_season['result'].has_key('episodes'):
     episodes = jsonobject_season['result']['episodes']
     for epi in allepisodes:
       if (int(epi.getElementsByTagName('SeasonNumber')[0].firstChild.nodeValue) > 0):
@@ -800,8 +796,8 @@ def missing_fetch1(name,id,path):
             try:
                 #print str(episode.get('season'))+"x"+str(episode.get('episode'))
                 if nepi < episode.get('episode') and nseason < episode.get('season'):
-                    print ("break")
-                    break
+					print "break"
+					break
 
                 if nepi == episode.get('episode') and nseason == episode.get('season'):
                     found = True
@@ -813,7 +809,7 @@ def missing_fetch1(name,id,path):
                 xbmc.log('SABnzbd-Suite: could not determine SABnzbds status', level=xbmc.LOGERROR)
 
         if not found:
-                print ("NOT found")
+                print "NOT found"
             #try:
                 ll = 'S{0:02d}E{1:02d}'.format(nseason,nepi)
                 tutti = tutti + separator + ll
@@ -826,7 +822,7 @@ def missing_fetch1(name,id,path):
                     if node is not None:
                         image = "http://www.nextepisode.tv/uploads/tvdb/"+node.nodeValue
 
-                        
+						
                 ename = 'S{0:02}E{1:02}'.format(nseason,nepi)
                 
 
@@ -834,7 +830,7 @@ def missing_fetch1(name,id,path):
                 if ie.length >0 :
                     node=ie[0].firstChild
                     if node is not None:
-                        ename = ename +" "+node.nodeValue #.encode('ascii', 'replace') 
+                        ename = ename +" "+node.nodeValue.encode('ascii', 'replace') 
                 data = ""
                 ie = epi.getElementsByTagName('FirstAired')
                 if ie.length >0 :
@@ -854,14 +850,14 @@ def missing_fetch1(name,id,path):
                 
 
                 #for yname in glob.glob(os.path.join(searchpath,pattern)):
-                #   ename = "[COLOR red]*[/COLOR]" + ename
+                #	ename = "[COLOR red]*[/COLOR]" + ename
 
                 #for yname in glob.glob(os.path.join(searchpath,"*/" + pattern)):
-                #   ename = "[COLOR red]*[/COLOR]" + ename
-                    
+                #	ename = "[COLOR red]*[/COLOR]" + ename
+					
                 #for yname in glob.glob(os.path.join(searchpath,"*/*/" + pattern)):
-                #   ename = "[COLOR red]*[/COLOR]" + ename
-                #print ename    
+                #	ename = "[COLOR red]*[/COLOR]" + ename
+				#print ename	
                 addDir(ename ,name,2,image,True,ll,path,data) 
             #except:
              #   addDir(epi.getElementsByTagName('SeasonNumber')[0].firstChild.nodeValue+"x"+epi.getElementsByTagName('EpisodeNumber')[0].firstChild.nodeValue ,name,2,"",True,epi.getElementsByTagName('SeasonNumber')[0].firstChild.nodeValue+"x"+epi.getElementsByTagName('EpisodeNumber')[0].firstChild.nodeValue,season) 
@@ -878,109 +874,7 @@ def missing_fetch1(name,id,path):
 
   return ret
 
-  
-def amule(name,url,path):
-  #print "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
-  #print name
-  #print url
-  ec = conn.ECConnection("openelec", UT_ADDRESS)
-  request= conn.create_ecpacket_add_link_req(url)
-  reply = ec.send_and_recv_ecpacket(request)
-  file = '/media/2T/temp/aMule/'+name + '.mv'
-  with open(file, 'w') as content_file:
-     content_file.write(path)  
-  xbmc.executebuiltin('Notification("'+ name +'","' +path+' ", icon = xbmcgui.NOTIFICATION_INFO)')
 
-
-
-def emule(name,url,path):
-  #print "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
-  #print name
-  #print url
-  eClient.HttpCmd(url)
-  xbmc.executebuiltin('Notification("'+ name +'","' +path+' ", icon = xbmcgui.NOTIFICATION_INFO)')
-
-
-def cercaEMule(tag,path,type='global'): 
-  tag = '+'.join(tag.split(' '))+'+ITA'
-  Postx='p=tabbarano&w=password'
-  Contentx = 'application/x-www-form-urlencoded'
-  url = 'http://bender:4711'
-  #print tag
-  Response = eClient.HttpCmd(url, postdta=Postx, content=Contentx)
-  match = re.compile('<input type="hidden" name=ses value="(.*)">').findall(Response)
-  token = match[0]
-  url = 'http://bender:4711/?tosearch='+tag+'&unicode=on&sort=3&sortAsc=0&type=&min=&max=&avail=&ext=&method='+type+'&ses='+token+'&w=search'
-  #print url
-  
-  Response = eClient.HttpCmd(url)
-  #print Response;
-
-  soup = BeautifulStoneSoup(Response,convertEntities=BeautifulSoup.HTML_ENTITIES)
-  found = False
-  data = ""
-  for item in soup.html.body.findAll('td',{ 'class':'search-line-left'}):
-      for i1 in item.parent.findNextSiblings('td',{ 'class':'search-line'},limit=1):
-        for i2 in i1.findNextSiblings('td',{ 'class':'search-line'},limit=1):
-            link = 'http://bender:4711/?ses='+token+'&w=search&downloads='+i1.findNext('font').text
-            addDir(item.findNext('font').text.encode('ascii', 'replace'),link,"emule","",False,"-md",path,rating = i2.findNext('font').text)
-
-  #print token
-
-  
-def cercaMule(tag,path,type='global'): 
-  #print tag
-
-  ec = conn.ECConnection("openelec", UT_ADDRESS)
-  if (type=='global'):
-    request= conn.create_ecpacket_search_global_req (tag)
-  elif (type=='kad'):
-    request= conn.create_ecpacket_search_kad_req (tag)
-  
-  reply = ec.send_and_recv_ecpacket(request)
-#  print reply.debugrepr()
-  
-  finito = False
-
-  #print "---------------------------------------------------------------------------------------------------------------------------"
-
-  while (not finito):
-    time.sleep(10)
-    request= conn.create_ecpacket_search_progress_req ()
-    reply = ec.send_and_recv_ecpacket(request)
-    if len(reply.subtags)>0:
-     if reply.subtags[0].tagdata == 0:
-        finito = True
-
-  request= conn.create_ecpacket_search_results_req ()
-  reply = ec.send_and_recv_ecpacket(request)
-  
-  for item in reply.subtags:
-    
-    try:
-        link = "ed2k://|file|" + urllib.parse.quote(item.subtags[3].tagdata) + "|" + str(item.subtags[4].tagdata) + "|" + (item.subtags[5].tagdata).encode("hex") + "|/" 
-        addDir(item.subtags[3].tagdata,link,"amule","",False,"-md",path,rating=item.subtags[0].tagdata)
-    except:
-       print ("errore")
-  
-def missing_fetch6(name,tag,puntate,path):
-  #print "///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////"
-  #print puntate
-  type='global'
-  if (name=="eMule kad"):
-    type='kademlia'
-  if puntate != None:
-    cercaMule(tag+" " +puntate,path,type)
-    try:
-        cercaMule(tag+" " +str(int(puntate[1:3])) + "x" + str(int(puntate[4:6])),path,type)  
-    except:
-        print ("error")
-  else:
-    cercaMule(tag,path,type)  
-  
-
-  
-#  addDir("Ricerca ita aMule","ita",6,"",True,"-md","e:/Documenti/Film")
   xbmcplugin.setContent(int(sys.argv[1]), 'movies')
   #xbmcplugin.addSortMethod(handle=int(sys.argv[1]), sortMethod=xbmcplugin.SORT_METHOD_UNSORTED)
   xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_VIDEO_RATING)
@@ -994,11 +888,11 @@ def missing_fetch():
   Medialist = []
   
   json_query = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShows", "params": {"properties": ["file", "imdbnumber", "art"], "sort": { "method": "label" } }, "id": 1}')
-  #json_query = str(json_query, 'utf-8', errors='ignore')
+  json_query = unicode(json_query, 'utf-8', errors='ignore')
   jsonobject = simplejson.loads(json_query)
-  if 'tvshows' in jsonobject['result']:
+  if jsonobject['result'].has_key('tvshows'):
     for item in jsonobject['result']['tvshows']:
-        #print item
+        print item
         addDir(item.get('label',''), str(item.get('tvshowid','')),1, str(item.get('art','').get('poster','')),True,item.get('file',''),banner = str(item.get('art','').get('banner','')))
 
 #  addDir("Ricerca ita eMule","ita",6,"",True,"","/media/VOLUME/Documenti/Film")
@@ -1025,23 +919,23 @@ def missing_fetch():
   return ret
 
 def libera(name,url,path):
-      keyboard = xbmc.Keyboard()
-      keyboard.doModal()
-      if (keyboard.isConfirmed()):
-            missing_fetch2("cerca",keyboard.getText(),"","/media/4T/Documenti/Film")
-          
+	  keyboard = xbmc.Keyboard()
+	  keyboard.doModal()
+	  if (keyboard.isConfirmed()):
+			missing_fetch2("cerca",keyboard.getText(),"","/media/4T/Documenti/Film")
+		  
 def popular(name,url,path):
-    xbmc.log( "url: %s" % ( url ), xbmc.LOGSEVERE ) 
-    missing_fetch2("popular",url,url,path)
-          
+	xbmc.log( "url: %s" % ( url ), xbmc.LOGSEVERE ) 
+	missing_fetch2("popular",url,url,path)
+		  
 
 
 
 def nuova_serie(name,url,path):
-      #keyboard = xbmc.Keyboard()
-      #keyboard.doModal()
-      #if (keyboard.isConfirmed()):
-    #       missing_fetch2("cerca",keyboard.getText(),"",path+keyboard.getText())
+	  #keyboard = xbmc.Keyboard()
+	  #keyboard.doModal()
+	  #if (keyboard.isConfirmed()):
+	#		missing_fetch2("cerca",keyboard.getText(),"",path+keyboard.getText())
  kb = xbmc.Keyboard('', '')
  kb.doModal()
  if not kb.isConfirmed():
@@ -1063,63 +957,63 @@ def nuova_serie(name,url,path):
  if selected < 0:
      return
  try:
-      trpc = TransmissionRPC()
-      params = {'download-dir': path+'/'+terms
-                }
-      remote_torrent = trpc.add_torrent_uri(results[selected]['url'], arguments = params)
-      if remote_torrent:
-            remote_torrent ="[COLOR green]success[/COLOR]"
-      else:
-            remote_torrent ="[COLOR red]failure[/COLOR]"
-      xbmc.executebuiltin('Notification("'+ remote_torrent + " " + name+ '","' +path+' ", icon = xbmcgui.NOTIFICATION_INFO)')
+	  trpc = TransmissionRPC()
+	  params = {'download-dir': path+'/'+terms
+				}
+	  remote_torrent = trpc.add_torrent_uri(results[selected]['url'], arguments = params)
+	  if remote_torrent:
+			remote_torrent ="[COLOR green]success[/COLOR]"
+	  else:
+			remote_torrent ="[COLOR red]failure[/COLOR]"
+	  xbmc.executebuiltin('Notification("'+ remote_torrent + " " + name+ '","' +path+' ", icon = xbmcgui.NOTIFICATION_INFO)')
  except:
      xbmcgui.Dialog().ok(_(32000), _(32293))
      return
-              
-          
-          
+			  
+		  
+		  
   
   
 def context(name,url,path):
-      
-      file = de_unc(path)+'search.tdb'
-      
-      if os.path.isfile(file):
-         with open(file, 'r') as content_file:
-          queue = content_file.read()
-      else: 
-         queue = name
+	  
+	  file = de_unc(path)+'search.tdb'
+	  
+	  if os.path.isfile(file):
+		 with open(file, 'r') as content_file:
+		  queue = content_file.read()
+	  else: 
+		 queue = name  +' ita'
 
-      keyboard = xbmc.Keyboard(queue)
-      keyboard.doModal()
-      if (keyboard.isConfirmed()):
-          with open(file, 'w') as content_file:
-              content_file.write(keyboard.getText())
+	  keyboard = xbmc.Keyboard(queue)
+	  keyboard.doModal()
+	  if (keyboard.isConfirmed()):
+		  with open(file, 'w') as content_file:
+			  content_file.write(keyboard.getText())
 
 
 def addDir(name,url,mode,iconimage="",folder=True,season="",path="",data="",plot = "",banner="",rating=0):
-    u = sys.argv[0]+"?id="+sys.argv[1]+"&url="+urllib.parse.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.parse.quote_plus(name)+"&season="+urllib.parse.quote_plus(season)+"&path="+urllib.parse.quote_plus(path)
+    u = sys.argv[0]+"?id="+sys.argv[1]+"&url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&season="+urllib.quote_plus(season)+"&path="+urllib.quote_plus(path)
     #print u
     ok = True
     icon = iconimage
     #icon1 = 'http://192.168.178.1:8085/fhem?cmd=showlog%20weblink_Bagno_grande%20FileLog_Bagno_grande%20temp5hum4%20Bagno_grande-2012-12.log&pos='
     point = xbmcgui.ListItem(label=name,iconImage=banner,label2=data,thumbnailImage = icon)
     
-    
+	
     infoLabels = dict()
     infoLabels['title'] = name
     infoLabels['plot'] = plot
     infoLabels['plotoutline'] = plot
     infoLabels['rating'] = rating 
     if data!="" :
-        infoLabels['date'] =data
+		infoLabels['date'] =data
     #infoLabels['duration'] = str(movie['length_in_minutes'])
     #infoLabels['cast'] = movie['cast']
     #infoLabels['director'] = ' / '.join(movie['directors'])
     #infoLabels['mpaa'] = str(movie['age_rating'])
     #infoLabels['code'] = str(movie['imdb_id'])
-    #infoLabels['genre'] = ' / '.join(movie['genres'])  
-    
+    #infoLabels['genre'] = ' / '.join(movie['genres'])	
+	
     point.setInfo( type='video', infoLabels=infoLabels )
     #point.setLabel2(data)
     #point.setProperty('label2',data)
@@ -1127,11 +1021,11 @@ def addDir(name,url,mode,iconimage="",folder=True,season="",path="",data="",plot
     point.setProperty('banner',banner)
     rp = "XBMC.RunPlugin(%s?mode=%s&name=%s&url=TNTDownload&path=%s)"
 
-    point.addContextMenuItems([("Cambia search string", rp % (sys.argv[0], "context",name,urllib.parse.quote_plus(season))),("Nuova serie", rp % (sys.argv[0], "nuova_serie",name,urllib.parse.quote_plus(season)))],replaceItems=False)
+    point.addContextMenuItems([("Cambia search string", rp % (sys.argv[0], "context",name,urllib.quote_plus(season))),("Nuova serie", rp % (sys.argv[0], "nuova_serie",name,urllib.quote_plus(season)))],replaceItems=False)
     
     ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=point,isFolder=folder,totalItems = 25)
-    
-    
+	
+	
  
 def media_path(path):
     # Check for stacked movies
@@ -1141,12 +1035,12 @@ def media_path(path):
         path = os.path.split(path)[0]
     # Fixes problems with rared movies and multipath
     if path.startswith("rar://"):
-        path = [os.path.split(urllib.request.url2pathname(path.replace("rar://","")))[0]]
+        path = [os.path.split(urllib.url2pathname(path.replace("rar://","")))[0]]
     elif path.startswith("multipath://"):
         temp_path = path.replace("multipath://","").split('%2f/')
         path = []
         for item in temp_path:
-            path.append(urllib.request.url2pathname(item))
+            path.append(urllib.url2pathname(item))
     else:
         path = [path]
     return path

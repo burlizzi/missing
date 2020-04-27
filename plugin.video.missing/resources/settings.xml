@@ -5,7 +5,7 @@
     <setting id="port" type="number" label="102" default="8080" />
     <setting id="usr" type="text" label="103" default="" />
     <setting id="pwd" type="text" label="104" default="" />
-    <setting id="type" type="enum" label="105" values="uTorrent|Transmission|aMule" default="0" />
+    <setting id="type" type="enum" label="105" values="uTorrent|Transmission" default="0" />
   </category>
   <category label="200">
     <setting id="tntusr" type="text" label="103" default="" />
