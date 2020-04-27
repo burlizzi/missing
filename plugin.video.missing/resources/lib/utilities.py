@@ -1,4 +1,4 @@
-import urllib.request, urllib.parse, urllib.error, urllib.request, urllib.error, urllib.parse, http.cookiejar, sys, os
+import urllib, urllib2, cookielib, sys, os
 from base64 import b64encode
 import xbmc
 
@@ -53,29 +53,29 @@ class Client(object):
         base_url = 'http://' + address + ':' + port
         self.url = base_url + '/gui/'
         if user:
-            password_manager = urllib.request.HTTPPasswordMgrWithDefaultRealm()
+            password_manager = urllib2.HTTPPasswordMgrWithDefaultRealm()
             password_manager.add_password(realm=None, uri=self.url, user=user, passwd=password)
-            self.MyCookies = http.cookiejar.LWPCookieJar()
+            self.MyCookies = cookielib.LWPCookieJar()
             if os.path.isfile(COOKIEFILE) : self.MyCookies.load(COOKIEFILE)
-            opener = urllib.request.build_opener(
-                urllib.request.HTTPCookieProcessor(self.MyCookies)
-                , urllib.request.HTTPBasicAuthHandler(password_manager)
+            opener = urllib2.build_opener(
+                urllib2.HTTPCookieProcessor(self.MyCookies)
+                , urllib2.HTTPBasicAuthHandler(password_manager)
                 )
             opener.addheaders = [('User-Agent', 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1) chromeframe/4.0')]
-            urllib.request.install_opener(opener)
+            urllib2.install_opener(opener)
 
     def HttpCmd(self, urldta, postdta=None, content=None):
         xbmc.log( "%s::HttpCmd - url: %s" % ( __addonname__, urldta ), xbmc.LOGDEBUG )
         ## Standard code
 
-        req = urllib.request.Request(urldta,postdta)
+        req = urllib2.Request(urldta,postdta)
 
         ## Process only if Upload..
         if content != None   :
                 req.add_header('Content-Type',content)
                 req.add_header('Content-Length',str(len(postdta)))
 
-        response = urllib.request.urlopen(req)
+        response = urllib2.urlopen(req)
         link=response.read()
         xbmc.log( "%s::HttpCmd - data: %s" % ( __addonname__, str(link) ), xbmc.LOGDEBUG )
         response.close()

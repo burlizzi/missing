@@ -32,7 +32,6 @@ import json
 import httplib
 import datetime
 import re
-import emule
 import getpass
 import time
 import glob
